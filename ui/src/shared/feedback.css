@@ -1,0 +1,354 @@
+/* Ladeanzeigen und Rueckmeldungen. Farben ueber --pf-* (je App im Wurzelelement gesetzt). */
+
+/* :where() ohne Spezifitaet: die Variablen der App gewinnen immer, egal in welcher Reihenfolge das CSS laedt */
+:where(html) {
+  --pf-accent: #3b82f6;
+  --pf-surface: #151c28;
+  --pf-border: rgba(255, 255, 255, 0.12);
+  --pf-text: rgba(255, 255, 255, 0.92);
+  --pf-muted: rgba(255, 255, 255, 0.55);
+  --pf-skeleton: rgba(255, 255, 255, 0.07);
+  --pf-skeleton-hi: rgba(255, 255, 255, 0.14);
+  --pf-danger: #ef4444;
+  --pf-danger-bg: rgba(239, 68, 68, 0.1);
+  --pf-danger-border: rgba(239, 68, 68, 0.45);
+  --pf-ok: #22c55e;
+}
+
+.pf-spinner {
+  display: inline-block;
+  width: 28px;
+  height: 28px;
+  border-radius: 50%;
+  border: 3px solid var(--pf-skeleton-hi);
+  border-top-color: var(--pf-accent);
+  animation: pf-spin 0.8s linear infinite;
+  flex-shrink: 0;
+}
+
+.pf-spinner-sm {
+  width: 14px;
+  height: 14px;
+  border-width: 2px;
+}
+
+@keyframes pf-spin {
+  to {
+    transform: rotate(360deg);
+  }
+}
+
+.pf-loading {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 0.6rem;
+  padding: 2rem 1rem;
+  color: var(--pf-muted);
+  font-size: 0.8rem;
+}
+
+.pf-loading-fill {
+  position: absolute;
+  inset: 0;
+  min-height: 100%;
+}
+
+.pf-loading-compact {
+  flex-direction: row;
+  padding: 0.6rem;
+}
+
+.pf-loading-compact .pf-spinner {
+  width: 16px;
+  height: 16px;
+  border-width: 2px;
+}
+
+.pf-skeleton-list {
+  display: flex;
+  flex-direction: column;
+  gap: 0.45rem;
+  padding: 0.25rem 0;
+}
+
+.pf-skeleton-row {
+  display: flex;
+  flex-direction: column;
+  gap: 0.35rem;
+  padding: 0.65rem 0.75rem;
+  border-radius: 6px;
+  border: 1px solid var(--pf-border);
+}
+
+.pf-skeleton-line {
+  display: block;
+  height: 0.6rem;
+  border-radius: 4px;
+  background: linear-gradient(90deg, var(--pf-skeleton) 0%, var(--pf-skeleton-hi) 50%, var(--pf-skeleton) 100%);
+  background-size: 200% 100%;
+  animation: pf-shimmer 1.4s ease-in-out infinite;
+}
+
+.pf-skeleton-line-sub {
+  height: 0.45rem;
+  opacity: 0.7;
+}
+
+@keyframes pf-shimmer {
+  0% {
+    background-position: 100% 0;
+  }
+  100% {
+    background-position: -100% 0;
+  }
+}
+
+.pf-state-icon {
+  width: 22px;
+  height: 22px;
+  flex-shrink: 0;
+}
+
+.pf-error-state {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+  flex-wrap: wrap;
+  padding: 0.75rem 0.9rem;
+  margin: 0.5rem 0;
+  border-radius: 6px;
+  border: 1px solid var(--pf-danger-border);
+  background: var(--pf-danger-bg);
+  color: var(--pf-text);
+}
+
+.pf-error-state .pf-state-icon {
+  color: var(--pf-danger);
+}
+
+.pf-error-text {
+  display: flex;
+  flex-direction: column;
+  gap: 0.15rem;
+  flex: 1;
+  min-width: 10rem;
+  font-size: 0.8rem;
+}
+
+.pf-error-text span {
+  color: var(--pf-muted);
+}
+
+.pf-empty-state {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 0.4rem;
+  padding: 1.5rem 1rem;
+  color: var(--pf-muted);
+  font-size: 0.8rem;
+  text-align: center;
+}
+
+.pf-btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.35rem;
+  padding: 0.35rem 0.75rem;
+  border-radius: 6px;
+  border: 1px solid var(--pf-border);
+  background: var(--pf-surface);
+  color: var(--pf-text);
+  cursor: pointer;
+  font-size: 0.78rem;
+}
+
+.pf-btn:hover {
+  border-color: var(--pf-accent);
+}
+
+.pf-btn-icon {
+  width: 14px;
+  height: 14px;
+}
+
+/* Busy-Zustand fuer Buttons waehrend einer schreibenden Anfrage */
+.pf-busy {
+  position: relative;
+  cursor: progress !important;
+  opacity: 0.75;
+}
+
+.pf-busy::after {
+  content: '';
+  display: inline-block;
+  width: 0.75em;
+  height: 0.75em;
+  margin-left: 0.45em;
+  vertical-align: -0.1em;
+  border-radius: 50%;
+  border: 2px solid currentColor;
+  border-right-color: transparent;
+  animation: pf-spin 0.7s linear infinite;
+}
+
+/* Fortschrittsbalken oben */
+.pf-progress {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  height: 2px;
+  z-index: 10000;
+  pointer-events: none;
+  opacity: 0;
+  transition: opacity 0.2s;
+  overflow: hidden;
+}
+
+.pf-progress.is-active {
+  opacity: 1;
+}
+
+.pf-progress span {
+  display: block;
+  width: 35%;
+  height: 100%;
+  background: var(--pf-accent);
+  animation: pf-progress 1.2s ease-in-out infinite;
+}
+
+@keyframes pf-progress {
+  0% {
+    transform: translateX(-100%);
+  }
+  100% {
+    transform: translateX(300%);
+  }
+}
+
+.pf-live {
+  position: fixed;
+  left: 50%;
+  bottom: 1rem;
+  transform: translateX(-50%);
+  z-index: 10001;
+  pointer-events: none;
+}
+
+.pf-slow-hint {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  padding: 0.45rem 0.8rem;
+  border-radius: 999px;
+  background: var(--pf-surface);
+  border: 1px solid var(--pf-border);
+  color: var(--pf-text);
+  font-size: 0.75rem;
+  box-shadow: 0 6px 18px rgba(0, 0, 0, 0.35);
+}
+
+.pf-toasts {
+  position: fixed;
+  right: 1rem;
+  bottom: 1rem;
+  z-index: 10002;
+  display: flex;
+  flex-direction: column;
+  gap: 0.4rem;
+  max-width: min(360px, calc(100vw - 2rem));
+}
+
+.pf-toast {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  padding: 0.55rem 0.6rem 0.55rem 0.75rem;
+  border-radius: 8px;
+  background: var(--pf-surface);
+  border: 1px solid var(--pf-border);
+  border-left: 3px solid var(--pf-ok);
+  color: var(--pf-text);
+  font-size: 0.78rem;
+  box-shadow: 0 8px 22px rgba(0, 0, 0, 0.4);
+  animation: pf-toast-in 0.18s ease-out;
+}
+
+.pf-toast-error {
+  border-left-color: var(--pf-danger);
+}
+
+.pf-toast-icon {
+  width: 18px;
+  height: 18px;
+  flex-shrink: 0;
+  color: var(--pf-ok);
+}
+
+.pf-toast-error .pf-toast-icon {
+  color: var(--pf-danger);
+}
+
+.pf-toast-text {
+  flex: 1;
+}
+
+.pf-toast-action {
+  border: 1px solid var(--pf-border);
+  background: transparent;
+  color: var(--pf-text);
+  border-radius: 5px;
+  padding: 0.2rem 0.5rem;
+  font-size: 0.72rem;
+  cursor: pointer;
+  white-space: nowrap;
+}
+
+.pf-toast-action:hover {
+  border-color: var(--pf-accent);
+}
+
+.pf-toast-close {
+  border: none;
+  background: transparent;
+  color: var(--pf-muted);
+  cursor: pointer;
+  padding: 0.1rem;
+  display: inline-flex;
+}
+
+.pf-toast-close svg {
+  width: 14px;
+  height: 14px;
+}
+
+@keyframes pf-toast-in {
+  from {
+    opacity: 0;
+    transform: translateY(6px);
+  }
+  to {
+    opacity: 1;
+    transform: none;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .pf-spinner,
+  .pf-busy::after,
+  .pf-skeleton-line,
+  .pf-progress span,
+  .pf-toast {
+    animation-duration: 0s !important;
+    animation-iteration-count: 1 !important;
+  }
+
+  .pf-spinner,
+  .pf-busy::after {
+    border-right-color: var(--pf-accent);
+    opacity: 0.8;
+  }
+}

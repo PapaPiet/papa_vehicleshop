@@ -1,0 +1,112 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+<meta charset="UTF-8">
+<title>papa_vehicleshop sign</title>
+<style>
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  html, body { width: 512px; height: 768px; overflow: hidden; background: #0b0b0d; }
+  body {
+    font-family: 'Inter', 'Segoe UI', Roboto, Arial, sans-serif; color: #f6f6f7;
+    -webkit-font-smoothing: antialiased;
+  }
+  .sign {
+    position: absolute; inset: 0; padding: 40px 38px 34px; display: flex; flex-direction: column; gap: 22px;
+    background:
+      radial-gradient(120% 70% at 100% 0%, rgba(59, 130, 246, 0.28), transparent 60%),
+      linear-gradient(180deg, #121217 0%, #0b0b0d 100%);
+    border: 6px solid #1c1c21;
+  }
+  .top { display: flex; align-items: center; justify-content: space-between; gap: 12px; }
+  .shop { font-size: 21px; font-weight: 700; color: #93c5fd; letter-spacing: 0.02em; text-transform: uppercase; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+  .pill { display: inline-flex; align-items: center; height: 34px; padding: 0 16px; border-radius: 999px; font-size: 18px; font-weight: 700; background: rgba(255, 255, 255, 0.08); color: #b4b4bc; white-space: nowrap; }
+  .pill.new { background: #3b82f6; color: #fff; }
+  .pill.warn { background: rgba(251, 191, 36, 0.18); color: #fbbf24; }
+  .pill.danger { background: rgba(248, 113, 113, 0.18); color: #f87171; }
+  .brand { font-size: 24px; color: #b4b4bc; font-weight: 600; margin-top: 10px; }
+  .model { font-size: 58px; font-weight: 800; line-height: 1.02; letter-spacing: -0.03em; word-break: break-word; }
+  .type { font-size: 20px; color: #7c7c86; margin-top: 4px; }
+  .price-box { margin-top: auto; padding: 22px 24px; border-radius: 22px; background: rgba(59, 130, 246, 0.12); border: 2px solid rgba(59, 130, 246, 0.45); }
+  .price-label { font-size: 18px; color: #93c5fd; text-transform: uppercase; letter-spacing: 0.08em; font-weight: 700; }
+  .price { font-size: 64px; font-weight: 800; letter-spacing: -0.03em; font-variant-numeric: tabular-nums; line-height: 1.1; }
+  .sub { font-size: 19px; color: #b4b4bc; margin-top: 4px; }
+  .rows { display: flex; flex-direction: column; gap: 14px; }
+  .row { display: flex; justify-content: space-between; align-items: center; font-size: 21px; }
+  .row span:first-child { color: #7c7c86; }
+  .row b { font-weight: 700; }
+  .bar { height: 12px; border-radius: 999px; background: rgba(255, 255, 255, 0.09); overflow: hidden; margin-top: 8px; }
+  .bar > i { display: block; height: 100%; border-radius: 999px; background: #34d399; }
+  .bar.warn > i { background: #fbbf24; }
+  .bar.danger > i { background: #f87171; }
+  .plate { display: inline-flex; align-items: center; height: 36px; padding: 0 14px; border-radius: 7px; background: #f2f2f2; color: #111; font-family: 'Consolas', monospace; font-weight: 800; font-size: 22px; letter-spacing: 0.06em; border-left: 10px solid #1d4ed8; }
+  .note { font-size: 20px; color: #f6f6f7; background: rgba(255, 255, 255, 0.06); padding: 12px 16px; border-radius: 14px; }
+  .overlay { position: absolute; inset: 0; display: none; place-items: center; background: rgba(11, 11, 13, 0.82); }
+  .overlay.on { display: grid; }
+  .overlay div { font-size: 46px; font-weight: 800; color: #fbbf24; transform: rotate(-12deg); border: 6px solid #fbbf24; padding: 12px 28px; border-radius: 18px; }
+  .empty { margin: auto; color: #7c7c86; font-size: 26px; text-align: center; }
+</style>
+</head>
+<body>
+<div class="sign" id="sign">
+  <div class="empty" id="empty"></div>
+</div>
+<div class="overlay" id="overlay"><div id="overlayText"></div></div>
+<script>
+  let texts = {};
+  const tx = (k, fallback) => texts[k] || fallback || '';
+  const esc = (s) => String(s == null ? '' : s).replace(/[&<>"']/g, (c) => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c]));
+
+  function tone(pct) {
+    return pct >= 80 ? '' : pct >= 50 ? 'warn' : 'danger';
+  }
+
+  function render(d) {
+    const sign = document.getElementById('sign');
+    const overlay = document.getElementById('overlay');
+    overlay.classList.remove('on');
+    if (!d || d.kind === 'empty') {
+      sign.innerHTML = '<div class="empty">' + esc(d && d.shop) + '</div>';
+      return;
+    }
+    const isNew = d.kind === 'showcase';
+    let badge = isNew ? '<span class="pill new">' + esc(tx('sign_new')) + '</span>' : '<span class="pill">' + esc(tx('sign_used')) + '</span>';
+    if (d.status === 'reserved') badge = '<span class="pill warn">' + esc(tx('sign_reserved')) + '</span>';
+    let html = '<div class="top"><span class="shop">' + esc(d.shop) + '</span>' + badge + '</div>';
+    html += '<div><div class="brand">' + esc(d.brand || '') + '</div><div class="model">' + esc(d.label) + '</div>';
+    html += '<div class="type">' + esc(tx('vtype_' + d.vtype, d.vtype)) + '</div></div>';
+    html += '<div class="rows">';
+    if (!isNew) {
+      const health = Math.max(0, 100 - (Number(d.damage) || 0));
+      html += '<div><div class="row"><span>' + esc(tx('sign_condition')) + '</span><b>' + health + ' %</b></div>';
+      html += '<div class="bar ' + tone(health) + '"><i style="width:' + health + '%"></i></div></div>';
+      if (d.fuel != null) html += '<div class="row"><span>' + esc(tx('sign_fuel')) + '</span><b>' + Math.round(d.fuel) + ' %</b></div>';
+      if (d.plate) html += '<div class="row"><span>' + esc(tx('sign_plate')) + '</span><span class="plate">' + esc(d.plate) + '</span></div>';
+    } else {
+      html += '<div class="row"><span>' + esc(tx('sign_delivery')) + '</span><b>' + esc(d.deliveryText || tx('sign_immediate')) + '</b></div>';
+      if (!d.available) html += '<div class="row"><span></span><b style="color:#fbbf24">' + esc(tx('sign_unavailable')) + '</b></div>';
+    }
+    if (d.note) html += '<div class="note">' + esc(d.note) + '</div>';
+    html += '</div>';
+    html += '<div class="price-box"><div class="price-label">' + esc(tx('sign_price')) + '</div>';
+    html += '<div class="price">' + esc(d.priceText || tx('sign_ask_staff')) + '</div>';
+    if (d.finance) html += '<div class="sub">' + esc(tx('sign_finance_from')) + '</div>';
+    html += '</div>';
+    sign.innerHTML = html;
+    if (d.status === 'testdrive') {
+      document.getElementById('overlayText').textContent = tx('sign_testdrive');
+      overlay.classList.add('on');
+    }
+  }
+
+  window.addEventListener('message', (event) => {
+    let msg = event.data;
+    if (typeof msg === 'string') {
+      try { msg = JSON.parse(msg); } catch (e) { return; }
+    }
+    if (!msg || typeof msg !== 'object') return;
+    if (msg.type === 'texts') texts = msg.data || {};
+    if (msg.type === 'show') render(msg.data);
+  });
+</script>
+</body>
+</html>
